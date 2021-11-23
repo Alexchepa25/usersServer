@@ -4,6 +4,8 @@ const app = express();
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
 
+const PORT = process.env.PORT || 3000;
+
 app.get("/register", function (request, response) {
 
     const validationErr = validateRequest(request.query);
@@ -67,7 +69,7 @@ app.get("/users", function (request, response) {
 
 });
 
-app.listen(3000);
+app.listen(PORT);
 
 
 function validateRequest(query) {
