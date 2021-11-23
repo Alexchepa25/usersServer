@@ -1,9 +1,9 @@
 {
     "name": "expressapp",
     "version": "1.0.0",
-    "main": "app.js",
+    "main": "index.js",
     "scripts": {
-        "start": "node app"
+        "start": "node index.js"
     },
     "dependencies": {
         "express": "^4.16.4",
