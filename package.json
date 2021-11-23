@@ -1,6 +1,10 @@
 {
     "name": "expressapp",
     "version": "1.0.0",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app"
+    },
     "dependencies": {
         "express": "^4.16.4",
         "sqlite3": "^5.0.2"
