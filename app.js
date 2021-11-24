@@ -3,6 +3,7 @@ const app = express();
 const fs = require ('fs');
 const json = require ('json');
 const multipart = require ('multipart');
+const path = require("path");
 
 const multer = require('multer');
 const upload = multer();
@@ -17,6 +18,8 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(upload.array()); 
+
+app.use(express.static('public')); 
 
 app.listen(PORT, () => {
     console.log(`Server is running on PORT: ${PORT}.`);
@@ -44,11 +47,9 @@ app.get("/", function (request, response) {
     `);
 });
 
-app.get("/register", function (request, response) 
-    {
-        var html = fs.readFileSync('register.html', 'utf8');       
-        response.send(html);
-    });
+app.get("/register", (req, res) => {
+res.sendFile(path.resolve(__dirname,  'public',  'register.html'));
+});
 
   
 
