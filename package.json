@@ -6,7 +6,12 @@
         "start": "node app.js"
     },
     "dependencies": {
+        "body-parser": "^1.19.0",
         "express": "^4.16.4",
+        "express-formidable": "^1.2.0",
+        "json": "^11.0.0",
+        "multer": "^1.4.3",
+        "multipart": "^0.1.5",
         "sqlite3": "^5.0.2"
     }
 }
