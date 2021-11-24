@@ -1,21 +1,68 @@
 const express = require("express");
 const app = express();
+const fs = require ('fs');
+const json = require ('json');
+const multipart = require ('multipart');
+
+const multer = require('multer');
+const upload = multer();
+const bodyParser = require('body-parser');
+const formidable = require('express-formidable');
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
 
 const PORT = process.env.PORT || 3000;
 
-app.get("/register", function (request, response) {
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true })); 
+app.use(upload.array()); 
 
-    const validationErr = validateRequest(request.query);
+app.listen(PORT, () => {
+    console.log(`Server is running on PORT: ${PORT}.`);
+});
+
+
+app.get("/", function (request, response) {
+    response.send(`
+    <h2>Home</h2>
+    <div>
+        <nav>
+        <ul>
+            <li>
+                <a href="/">Home</a>
+            </li>
+            <li>
+                <a href="/register">User registration</a>
+            </li>
+            <li>
+                <a href="/users">List of users</a>
+            </li>
+        </ul>
+        </nan>
+    </div>
+    `);
+});
+
+app.get("/register", function (request, response) 
+    {
+        var html = fs.readFileSync('register.html', 'utf8');       
+        response.send(html);
+    });
+
+  
+
+app.post("/register", function (request, response) {
+
+    const validationErr = validateRequest(request.body);
     if (validationErr) {
         response.send(`<h2>${validationErr}</h2>`);
+        return;
     }
-    var email = request.query.email;
-    var name = request.query.name;
-    var surname = request.query.surname;
-    var age = request.query.age;
+    var email = request.body.email;
+    var name = request.body.name;
+    var surname = request.body.surname;
+    var age = request.body.age;
     age = parseInt(age);
 
 
@@ -35,25 +82,40 @@ app.get("/register", function (request, response) {
         });
     });
 
-    response.send("<h2>ok</h2>");
+
+    response.send(`
+    <h2>OK</h2>
+    <div>
+        <nav>
+        <ul>
+            <li>
+                <a href="/">Home</a>
+            </li>
+
+            <li>
+                <a href="/users">List of users</a>
+            </li>
+        </ul>
+        </nan>
+    </div>
+    `);
 });
 
 
 app.get("/users", function (request, response) {
 
-    if (!request.query.email) {
-        response.send(`<h2>Email is required</h2>`);
-    }
+    var emails = request.query.email ? request.query.email.split(',') : ''; 
 
-
-    var emails = request.query.email.split(',');
- 
     let ors = '';
-    emails.forEach(email => {
-        ors += ' email = "' + email + '" OR ';
-    }); 
-    ors = ors.substr (0, ors.length - 4);
-
+    if(emails){
+        emails.forEach(email => {
+            ors += ' email = "' + email + '" OR ';
+        }); 
+        ors = ors.substr (0, ors.length - 4);
+    }else{
+        ors  = ' email like "%" ';
+    }
+    
 
     db.serialize(async function () {
 
@@ -61,15 +123,33 @@ app.get("/users", function (request, response) {
             if (err) {
                 return console.log(err.message);
             }
-            console.log(rows.email + " " + rows.name);
-            response.send(rows);    
+            let tableHtml = `
+              <table style='font-size: 18px'>
+            <tr style='color: green; font-size: 24px'>
+                <th><i>№</i></th>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Age</th>
+            </tr>`;
+            rows.forEach((row, i) => {
+                let rowHtml = '<tr>';
+                rowHtml += '<td style="padding: 10px 25px;">' + (i + 1) + '</td>';
+                rowHtml += '<td style="padding: 10px 25px;">' + row.email + '</td>';
+                rowHtml += '<td style="padding: 10px 25px;">' + row.name + '</td>';
+                rowHtml += '<td style="padding: 10px 25px;">' + row.surname + '</td>';
+                rowHtml += '<td style="padding: 10px 25px;">' + row.age + '</td>';
+                rowHtml += '</tr>';
+                tableHtml += rowHtml; 
+            });
+            tableHtml += '</table>';
+
+            response.send(tableHtml);    
         });
         
     });
 
 });
-
-app.listen(PORT);
 
 
 function validateRequest(query) {
